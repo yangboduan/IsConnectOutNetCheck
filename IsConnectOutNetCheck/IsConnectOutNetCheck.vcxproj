@@ -34,7 +34,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -100,7 +100,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -126,15 +126,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="capture_packet.cpp" />
+    <ClCompile Include="getconfigcontent.cpp" />
     <ClCompile Include="GetIPAddress.cpp" />
+    <ClCompile Include="get_IPRange_From_ConfigFile.cpp" />
+    <ClCompile Include="IsIPInRange.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="myDateTime.cpp" />
+    <ClCompile Include="splitStringToVect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="capture_packet.h" />
+    <ClInclude Include="getconfigcontent.h" />
     <ClInclude Include="GetIPAddress.h" />
+    <ClInclude Include="get_IPRange_From_ConfigFile.h" />
     <ClInclude Include="IpHeader.h" />
+    <ClInclude Include="IsIPInRange.h" />
     <ClInclude Include="myDateTime.h" />
+    <ClInclude Include="splitStringToVect.h" />
     <ClInclude Include="ThreadPool.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

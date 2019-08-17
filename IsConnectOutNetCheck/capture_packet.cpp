@@ -6,12 +6,14 @@
 #include <atomic> 
 #include <sstream>
 #include <set>
+#include "IsIPInRange.h"
 
 extern std::atomic<int >g_isCanRead;
 extern std::atomic<int >g_ncout;
 extern std::set<string> g_set_ip;
 extern std::atomic<int >g_isCanRead;
 extern std::atomic<int >g_capture_packet_function_num;
+extern vector<iprange_str> g_vec_iprange_str;
 int capture_packet(string szIP) {
 	g_capture_packet_function_num++;
 	//创建SOCK_RAW的socket
@@ -63,7 +65,7 @@ int capture_packet(string szIP) {
 	{
 		
 		//计算器，每当g_ncout =2时，则检查本机是否还存在IP地址；
-		if (g_ncout == 2 and g_isCanRead == 1) {
+		if (g_ncout == 2 && g_isCanRead == 1) {
 			auto iter = g_set_ip.find(szIP);
 			
 			if (iter == g_set_ip.end()) {//如果本机已经无此IP地址，则退出此程序，停止抓包
@@ -103,10 +105,21 @@ int capture_packet(string szIP) {
 		a.s_addr = ip->DestinationAddr;
 		string szDestinationAddr = inet_ntoa(a);
 		std::ostringstream ossString;
-		ossString <<"number:"<<number<<"\t "<<"Time:"<< myDateTime()<<"\t"<<szSourceIP << "  ------>  " << szDestinationAddr 
-			<< "\tprotocol:"<< int(ip->Protocol)<<"\n";
-		std::cout << ossString.str() ;
-		std::cout.flush();
+		string szConnectResutl ;
+		if (isIPInRange(szSourceIP, g_vec_iprange_str)) {
+			szConnectResutl = "Internal";
+		}
+		else {
+			szConnectResutl = "External";
+		}
+		//只输出接收到的包
+		if (szDestinationAddr == szIP) {
+			ossString << "number:" << number << "\t " << "Time:" << myDateTime() << "\t" << szSourceIP << "  ------>  " << szDestinationAddr
+				<< "\tprotocol:" << int(ip->Protocol) << "\t ConnectResult:" << szConnectResutl << "\n";
+			std::cout << ossString.str();
+			std::cout.flush();
+		}
+		
 	}
 
 

@@ -27,6 +27,18 @@
     <ClCompile Include="myDateTime.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="IsIPInRange.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="getconfigcontent.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="get_IPRange_From_ConfigFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="splitStringToVect.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GetIPAddress.h">
@@ -42,6 +54,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ThreadPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IsIPInRange.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="getconfigcontent.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="get_IPRange_From_ConfigFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="splitStringToVect.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -12,16 +12,22 @@
 #include "ThreadPool.h"
 #include "sstream"
 
+#include "get_IPRange_From_ConfigFile.h"
+#include <vector>
+using std::vector;
+#include "IsIPInRange.h"
+
 #define THREAD_NUM 6  //线程池中的线程数量
 #pragma comment( lib, "ws2_32.lib")
 std::atomic<int >g_isCanRead = 1; //是否可以读 g_set_ip变量
 std::atomic<int >g_ncout = 1; //计数器
 set<string> g_set_ip; //存储本机的IP地址
 std::atomic<int >g_capture_packet_function_num = 0;//当前抓包函数capture_packet运行的个数；
+vector<iprange_str> g_vec_iprange_str;
 int main(int argc, char* argv[])
 {
 	
-	
+	get_IPRange_From_ConfigFile("C:\\config.ini");
 	Ip_Header* ip;
 	int Timeout = 1000;
 	SOCKET ReceiveSocket;
