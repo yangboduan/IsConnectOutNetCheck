@@ -68,5 +68,11 @@
     <ClInclude Include="splitStringToVect.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="struct_iprange_str.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="struct_iprange_unit.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

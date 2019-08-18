@@ -7,18 +7,22 @@
 #include <sstream>
 #include <set>
 #include "IsIPInRange.h"
-
+#include <fstream>
+using std::ofstream;
+#define RECVBUFFMAXSIZE 4096
 extern std::atomic<int >g_isCanRead;
 extern std::atomic<int >g_ncout;
 extern std::set<string> g_set_ip;
 extern std::atomic<int >g_isCanRead;
 extern std::atomic<int >g_capture_packet_function_num;
 extern vector<iprange_str> g_vec_iprange_str;
+extern ofstream g_logfile;
 int capture_packet(string szIP) {
 	g_capture_packet_function_num++;
 	//创建SOCK_RAW的socket
 	SOCKET ReceiveSocket;
-	ReceiveSocket = socket(AF_INET, SOCK_RAW, IPPROTO_IP);
+	//ReceiveSocket = socket(AF_INET, SOCK_RAW, IPPROTO_IP);
+	ReceiveSocket = WSASocket(AF_INET, SOCK_RAW, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (ReceiveSocket == INVALID_SOCKET)
 	{
 		printf("socket failed with error %d\n", WSAGetLastError());
@@ -46,7 +50,11 @@ int capture_packet(string szIP) {
 
 	u_long InOutParam = 1;
 	//接收网络所有数据包
-	Result = ioctlsocket(ReceiveSocket, SIO_RCVALL, &InOutParam);
+	/*Result = ioctlsocket(ReceiveSocket, SIO_RCVALL, &InOutParam);*/
+	DWORD dwBufferLen[10];
+	DWORD dwBufferInLen = 1;
+	DWORD dwBytesReturned = 0;
+	Result = WSAIoctl(ReceiveSocket, SIO_RCVALL, &dwBufferInLen, sizeof(dwBufferInLen), &dwBufferLen, sizeof(dwBufferLen), &dwBytesReturned, NULL, NULL);
 	if (Result == SOCKET_ERROR)
 	{
 		printf("WSAIoctl failed with error %d \n", WSAGetLastError());
@@ -54,13 +62,17 @@ int capture_packet(string szIP) {
 		g_capture_packet_function_num--;
 		return 0;
 	}
-	char RecvBuffer[1502];
-	memset(RecvBuffer, 0, 1502);
+	char RecvBuffer[RECVBUFFMAXSIZE];
+	memset(RecvBuffer, 0, RECVBUFFMAXSIZE);
 
 	sockaddr_in addr;
 	Ip_Header* ip;
 	int Len = sizeof(addr);
 	int is_decrease = 0;
+	int nRecvBuf = 32 * 1024;
+	setsockopt(ReceiveSocket, SOL_SOCKET, SO_RCVBUF, (const char*)& nRecvBuf, sizeof(int));
+	int packet_count = 0; //记录写入到文件中包记录的个数
+	int isContinue_write = 1;//是否继续向文件中写入日志信息
 	while (1)
 	{
 		
@@ -85,7 +97,7 @@ int capture_packet(string szIP) {
 
 		memset(RecvBuffer, 0, sizeof(RecvBuffer));
 		memset(&addr, 0, sizeof(addr));
-		Result = recvfrom(ReceiveSocket, RecvBuffer, 1502, 0, (sockaddr*)& addr, &Len);
+		Result = recvfrom(ReceiveSocket, RecvBuffer, RECVBUFFMAXSIZE, 0, (sockaddr*)& addr, &Len);
 		if (Result == SOCKET_ERROR)//如果接受报文错误
 		{
 			printf("recvfrom failed with error %d \n", WSAGetLastError());
@@ -94,6 +106,8 @@ int capture_packet(string szIP) {
 			return 0;
 		}
 		
+		
+
 		static int number = 0;
 		number++;
 		
@@ -101,9 +115,11 @@ int capture_packet(string szIP) {
 		struct in_addr a;
 		a.s_addr = ip->SourceAddr;
 		string szSourceIP = inet_ntoa(a);
-		
+		//printf("ip source IP: %s\t", inet_ntoa(a));
 		a.s_addr = ip->DestinationAddr;
 		string szDestinationAddr = inet_ntoa(a);
+		//printf("ip destination IP: %s\t", inet_ntoa(a));
+		//printf("protocol: %d\n", ip->Protocol);
 		std::ostringstream ossString;
 		string szConnectResutl ;
 		if (isIPInRange(szSourceIP, g_vec_iprange_str)) {
@@ -112,12 +128,27 @@ int capture_packet(string szIP) {
 		else {
 			szConnectResutl = "External";
 		}
-		//只输出接收到的包
-		if (szDestinationAddr == szIP) {
-			ossString << "number:" << number << "\t " << "Time:" << myDateTime() << "\t" << szSourceIP << "  ------>  " << szDestinationAddr
-				<< "\tprotocol:" << int(ip->Protocol) << "\t ConnectResult:" << szConnectResutl << "\n";
-			std::cout << ossString.str();
-			std::cout.flush();
+		////只输出接收到的包
+		if (szDestinationAddr == szIP && szConnectResutl == "External") {
+			if (isContinue_write == 1) {
+				packet_count++;
+				if (packet_count >= 5000) {//如果大于5000条记录，则不继续向文件中写入日志，防止文件日志量过大
+					isContinue_write = 0;
+				}
+			}
+			
+			//ossString << "number:" << number << "\t " << "Time:" << myDateTime() << "\t" << szSourceIP << "  ------>  " << szDestinationAddr
+				//<< "\tprotocol:" << int(ip->Protocol) << "\t ConnectResult:" << szConnectResutl << "\n";
+
+			ossString << "Time:" << myDateTime() << "\t" << szSourceIP << "  ------>  " << szDestinationAddr
+				<< "\tprotocol:" << int(ip->Protocol)<<std::endl  ;
+			std::cout << ossString.str()<<std::endl;
+			if (isContinue_write == 1) {
+				g_logfile << ossString.str();
+				g_logfile.flush();
+			}
+			
+			//std::cout.flush();
 		}
 		
 	}

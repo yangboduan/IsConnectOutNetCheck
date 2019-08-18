@@ -1,6 +1,6 @@
 //ref url::https://bbs.csdn.net/topics/380112724
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-
+#pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" ) //不弹窗口，后台运行。
 #include "stdio.h"
 #include "Winsock2.h"
 #include "mstcpip.h"
@@ -11,11 +11,13 @@
 #include "capture_packet.h"
 #include "ThreadPool.h"
 #include "sstream"
-
+#include <fstream>
+#include "IsIPInRange.h"
 #include "get_IPRange_From_ConfigFile.h"
 #include <vector>
+#include<fstream>
 using std::vector;
-#include "IsIPInRange.h"
+using std::ofstream;
 
 #define THREAD_NUM 6  //线程池中的线程数量
 #pragma comment( lib, "ws2_32.lib")
@@ -23,11 +25,17 @@ std::atomic<int >g_isCanRead = 1; //是否可以读 g_set_ip变量
 std::atomic<int >g_ncout = 1; //计数器
 set<string> g_set_ip; //存储本机的IP地址
 std::atomic<int >g_capture_packet_function_num = 0;//当前抓包函数capture_packet运行的个数；
-vector<iprange_str> g_vec_iprange_str;
+vector<iprange_str> g_vec_iprange_str;  //capture_packet 函数会根据此变量的值判断访问内网还是外网
+ofstream g_logfile;
+using std::ios;
 int main(int argc, char* argv[])
 {
+	//从配置文件中获取IP范围的配置信息 
+	g_vec_iprange_str = get_IPRange_From_ConfigFile(".\\IsConnectOutNetCheck.ini", "isConnExternalNetCheck", "IPRange");
 	
-	get_IPRange_From_ConfigFile("C:\\config.ini");
+	g_logfile.open(".\\ConnectOutNetLog.txt", ios::out | ios::app);
+	
+	
 	Ip_Header* ip;
 	int Timeout = 1000;
 	SOCKET ReceiveSocket;
@@ -94,5 +102,6 @@ int main(int argc, char* argv[])
 		printf("WSACleanup failed with error %d\n", WSAGetLastError());
 		return 0;
 	}
+	g_logfile.close();
 	return 1;
 }

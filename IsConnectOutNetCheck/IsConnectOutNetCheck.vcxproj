@@ -107,6 +107,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,6 +144,8 @@
     <ClInclude Include="IsIPInRange.h" />
     <ClInclude Include="myDateTime.h" />
     <ClInclude Include="splitStringToVect.h" />
+    <ClInclude Include="struct_iprange_str.h" />
+    <ClInclude Include="struct_iprange_unit.h" />
     <ClInclude Include="ThreadPool.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
